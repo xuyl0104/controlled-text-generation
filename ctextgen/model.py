@@ -160,7 +160,8 @@ class RNN_VAE(nn.Module):
         inputs_emb = self.word_emb(dec_inputs)  # seq_len x mbsize x emb_dim
         inputs_emb = torch.cat([inputs_emb, init_h.repeat(seq_len, 1, 1)], 2)
 
-        outputs, _ = self.decoder(inputs_emb, init_h)
+        # _ is the hidden state
+        outputs, _ = self.decoder(inputs_emb, init_h)  # decoder is a simple GRU
         seq_len, mbsize, _ = outputs.size()
 
         outputs = outputs.view(seq_len*mbsize, -1)
@@ -233,8 +234,8 @@ class RNN_VAE(nn.Module):
         else:
             c = self.forward_discriminator(sentence.transpose(0, 1))
 
-        # Decoder: sentence -> y
-        y = self.forward_decoder(dec_inputs, z, c)
+        # Decoder: sentence -> y ? Should it be z -> y?
+        y = self.forward_decoder(dec_inputs, z, c)  # TODO look at this function in details
 
         recon_loss = F.cross_entropy(
             y.view(-1, self.n_vocab), dec_targets.view(-1), size_average=True
